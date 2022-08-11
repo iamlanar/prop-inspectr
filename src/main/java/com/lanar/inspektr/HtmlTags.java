@@ -1,4 +1,4 @@
-package com.lanar.pi;
+package com.lanar.inspektr;
 
 public class HtmlTags {
     public static final String TR_O = "<tr>\n";

@@ -1,4 +1,4 @@
-package com.lanar.pi;
+package com.lanar.inspektr;
 
 import java.nio.file.Paths;
 

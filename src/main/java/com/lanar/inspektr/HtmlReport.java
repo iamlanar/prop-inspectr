@@ -1,25 +1,28 @@
-package com.lanar.pi;
+package com.lanar.inspektr;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import static com.lanar.pi.HtmlTags.*;
+import static com.lanar.inspektr.HtmlTags.*;
 
-public class Main {
-    private static Arguments cfg;
+public class HtmlReport implements Renderable {
+    private final Map<String, Properties> props;
+    private final Arguments cfg;
 
-    public static void main(String[] args) {
-        cfg = Arguments.fromArgs(args);
-        var props = readFiles(cfg.getFrom());
-        render(props);
+    public HtmlReport(Map<String, Properties> props, Arguments cfg) {
+        this.props = props;
+        this.cfg = cfg;
     }
 
-    private static void render(Map<String, Properties> props) {
+    @Override
+    public void render() {
         var template = loadTemplate();
         var replacement = renderHead(props.keySet()) + renderBody(props);
         template = template.replaceAll("PLACEHOLDER", replacement);
@@ -34,7 +37,7 @@ public class Main {
         }
     }
 
-    private static String loadTemplate() {
+    private String loadTemplate() {
         var resource = Main.class.getClassLoader().getResource("index.html");
         try {
             var path = Path.of(resource.toURI());
@@ -46,7 +49,7 @@ public class Main {
         }
     }
 
-    private static String renderHead(Set<String> keys) {
+    private String renderHead(Set<String> keys) {
         var tHead = new StringBuilder(TR_O);
         tHead.append(TH_O).append("Property / Env").append(TH_C);
         for (var key : keys) {
@@ -58,7 +61,7 @@ public class Main {
         return tHead.toString();
     }
 
-    private static String renderBody(Map<String, Properties> props) {
+    private String renderBody(Map<String, Properties> props) {
         var tBody = new StringBuilder();
         var propNames = getPropertyNames(props);
         for (var name : propNames) {
@@ -82,7 +85,7 @@ public class Main {
         return tBody.toString();
     }
 
-    private static Set<String> getPropertyNames(Map<String, Properties> props) {
+    private Set<String> getPropertyNames(Map<String, Properties> props) {
         var names = new LinkedHashSet<String>();
         for (var prop : props.values()) {
             for (Object key : prop.keySet()) {
@@ -90,34 +93,5 @@ public class Main {
             }
         }
         return names;
-    }
-
-    private static Map<String, Properties> readFiles(String path) {
-        System.out.printf("Reading files from %s%n", path);
-        var dir = new File(path);
-        if (dir.listFiles() == null) {
-            throw new RuntimeException(String.format("Cannot open directory %s", path));
-        }
-
-        var parsed = new HashMap<String, Properties>();
-        for (File file : dir.listFiles()) {
-            parsed.put(cleanFileName(file.getName()), readFile(file));
-        }
-
-        return parsed;
-    }
-
-    private static String cleanFileName(String fileName) {
-        return fileName.split("\\.")[0].toUpperCase();
-    }
-
-    private static Properties readFile(File file) {
-        try(var stream = new FileInputStream(file)) {
-            var props = new Properties();
-            props.load(stream);
-            return props;
-        } catch (Exception e) {
-            throw new RuntimeException("Error loading file", e);
-        }
     }
 }
