@@ -1,11 +1,13 @@
 package com.lanar.pi;
 
+import java.nio.file.Paths;
+
 public class Arguments {
     public static final String FROM_ARG = "--from";
     public static final String TO_ARG = "--to";
 
-    private String from;
-    private String to;
+    private String from = "";
+    private String to = Paths.get("").toAbsolutePath() + "-report.html";
 
     public static Arguments fromArgs(String[] args) {
         if (args.length > 4) {

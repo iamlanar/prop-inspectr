@@ -6,15 +6,16 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static com.lanar.pi.HtmlTags.*;
 
 public class Main {
+    private static Arguments cfg;
 
     public static void main(String[] args) {
-        var props = readFiles("E:\\code\\prop-inspector\\files");
+        cfg = Arguments.fromArgs(args);
+        var props = readFiles(cfg.getFrom());
         render(props);
     }
 
@@ -22,7 +23,7 @@ public class Main {
         var template = loadTemplate();
         var replacement = renderHead(props.keySet()) + renderBody(props);
         template = template.replaceAll("PLACEHOLDER", replacement);
-        var path = Paths.get("").toAbsolutePath() + "-report.html";
+        var path = cfg.getTo();
         System.out.printf("Writing report to %s%n", path);
         File report = new File(path);
         try {
@@ -46,7 +47,7 @@ public class Main {
     }
 
     private static String renderHead(Set<String> keys) {
-        StringBuilder tHead = new StringBuilder(TR_O);
+        var tHead = new StringBuilder(TR_O);
         tHead.append(TH_O).append("Property / Env").append(TH_C);
         for (var key : keys) {
             tHead.append(TH_O);
@@ -58,7 +59,7 @@ public class Main {
     }
 
     private static String renderBody(Map<String, Properties> props) {
-        StringBuilder tBody = new StringBuilder();
+        var tBody = new StringBuilder();
         var propNames = getPropertyNames(props);
         for (var name : propNames) {
             tBody.append(TR_O);
@@ -92,6 +93,7 @@ public class Main {
     }
 
     private static Map<String, Properties> readFiles(String path) {
+        System.out.printf("Reading files from %s%n", path);
         var dir = new File(path);
         if (dir.listFiles() == null) {
             throw new RuntimeException(String.format("Cannot open directory %s", path));
