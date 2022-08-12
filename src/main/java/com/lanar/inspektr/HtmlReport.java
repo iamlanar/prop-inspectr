@@ -1,16 +1,24 @@
 package com.lanar.inspektr;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.lanar.inspektr.HtmlTags.*;
+import static com.lanar.inspektr.HtmlTags.TD_C;
+import static com.lanar.inspektr.HtmlTags.TD_O;
+import static com.lanar.inspektr.HtmlTags.TH_C;
+import static com.lanar.inspektr.HtmlTags.TH_O;
+import static com.lanar.inspektr.HtmlTags.TR_C;
+import static com.lanar.inspektr.HtmlTags.TR_O;
+
 
 public class HtmlReport implements Renderable {
     private final Map<String, Properties> props;
@@ -25,7 +33,8 @@ public class HtmlReport implements Renderable {
     public void render() {
         var template = loadTemplate();
         var replacement = renderHead(props.keySet()) + renderBody(props);
-        template = template.replaceAll("PLACEHOLDER", replacement);
+        replacement = replacement.replace("\\{", "\\\\{").replace("}", "\\\\}");
+        template = template.replace("PLACEHOLDER", replacement);
         var path = cfg.getTo();
         System.out.printf("Writing report to %s%n", path);
         File report = new File(path);
@@ -33,19 +42,24 @@ public class HtmlReport implements Renderable {
             Files.writeString(Path.of(report.getPath()), template);
             System.out.println("Done");
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write report");
+            throw new InspectrException("Failed to write report", e);
         }
     }
 
     private String loadTemplate() {
-        var resource = Main.class.getClassLoader().getResource("index.html");
         try {
-            var path = Path.of(resource.toURI());
-            return Files.readString(path);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Failed to load template index.html");
+            var loader = ClassLoader.getSystemClassLoader();
+            try(var is = loader.getResourceAsStream("index.html")) {
+                if (is == null) {
+                    throw new InspectrException("Failed to load template index.html");
+                }
+                try(var isr = new InputStreamReader(is);
+                    var reader = new BufferedReader(isr)) {
+                    return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+                }
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new InspectrException("Failed to load template index.html", e);
         }
     }
 

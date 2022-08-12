@@ -11,11 +11,11 @@ public class Arguments {
 
     public static Arguments fromArgs(String[] args) {
         if (args.length > 4) {
-            throw new RuntimeException("Too many arguments");
+            throw new InspectrException("Too many arguments");
         }
 
         if (args.length % 2 != 0) {
-            throw new RuntimeException("Not enough arguments");
+            throw new InspectrException("Not enough arguments");
         }
 
         var arguments = new Arguments();
