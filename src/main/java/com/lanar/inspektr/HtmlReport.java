@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.lanar.inspektr.HtmlTags.TD_C;
@@ -100,7 +100,7 @@ public class HtmlReport implements Renderable {
     }
 
     private Set<String> getPropertyNames(Map<String, Properties> props) {
-        var names = new LinkedHashSet<String>();
+        var names = new TreeSet<String>();
         for (var prop : props.values()) {
             for (Object key : prop.keySet()) {
                 names.add(key.toString());
