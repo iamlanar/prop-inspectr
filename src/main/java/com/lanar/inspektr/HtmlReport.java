@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,6 +17,7 @@ import static com.lanar.inspektr.HtmlTags.TD_C;
 import static com.lanar.inspektr.HtmlTags.TD_O;
 import static com.lanar.inspektr.HtmlTags.TH_C;
 import static com.lanar.inspektr.HtmlTags.TH_O;
+import static com.lanar.inspektr.HtmlTags.TR_0_W_CLASS;
 import static com.lanar.inspektr.HtmlTags.TR_C;
 import static com.lanar.inspektr.HtmlTags.TR_O;
 
@@ -79,7 +81,9 @@ public class HtmlReport implements Renderable {
         var tBody = new StringBuilder();
         var propNames = getPropertyNames(props);
         for (var name : propNames) {
-            tBody.append(TR_O);
+            System.out.println(name);
+            var tag = hasEqualValues(name) ? TR_0_W_CLASS : TR_O;
+            tBody.append(tag);
             tBody.append(TD_O).append(name).append(TD_C);
             for (var prop : props.values()) {
                 tBody.append(TD_O);
@@ -97,6 +101,18 @@ public class HtmlReport implements Renderable {
         }
 
         return tBody.toString();
+    }
+
+    private boolean hasEqualValues(String name) {
+        var value = props.values().stream().findFirst().get().get(name);
+        for (var env : props.values()) {
+            String nextValue = env.get(name).toString();
+            if (!Objects.equals(value,nextValue)) {
+                return false;
+            }
+            value = nextValue;
+        }
+        return true;
     }
 
     private Set<String> getPropertyNames(Map<String, Properties> props) {

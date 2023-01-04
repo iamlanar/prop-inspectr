@@ -2,6 +2,7 @@ package com.lanar.inspektr;
 
 public class HtmlTags {
     public static final String TR_O = "<tr>\n";
+    public static final String TR_0_W_CLASS = "<tr class='equal'>\n";
     public static final String TR_C = "</tr>\n";
     public static final String TH_O = "<th>";
     public static final String TH_C = "</th>";
